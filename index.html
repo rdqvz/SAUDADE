@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para a minha princesa Lara ❤️</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Pacifico&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti JS -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b080c',
+                        darkCard: '#160d14',
+                        roseRed: '#ff2a5f',
+                        crimsonGlow: '#e60039',
+                        cutePink: '#ff85a2',
+                        softRed: '#ff4d6d'
+                    },
+                    fontFamily: {
+                        pacifico: ['Pacifico', 'cursive'],
+                        comfortaa: ['Comfortaa', 'sans-serif'],
+                        quicksand: ['Quicksand', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0b080c;
+            color: #fff0f3;
+            font-family: 'Quicksand', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Gradient & Glow FX */
+        .glow-title {
+            text-shadow: 0 0 15px rgba(255, 42, 95, 0.7), 0 0 30px rgba(230, 0, 57, 0.4);
+        }
+
+        .glass-card {
+            background: rgba(22, 13, 20, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 77, 109, 0.25);
+            box-shadow: 0 10px 30px -10px rgba(230, 0, 57, 0.3),
+                        inset 0 0 15px rgba(255, 42, 95, 0.1);
+        }
+
+        .glass-card-hover {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: rgba(255, 77, 109, 0.6);
+            box-shadow: 0 15px 35px -5px rgba(230, 0, 57, 0.5),
+                        0 0 20px rgba(255, 133, 162, 0.3);
+        }
+
+        /* Floating Hearts Canvas */
+        #heart-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Heart pulsing animation */
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        .pulse-heart {
+            animation: heartbeat 1.8s infinite ease-in-out;
+        }
+
+        /* Soft floating animation */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+        .float-anim {
+            animation: floatSlow 4s infinite ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b080c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff2a5f;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff85a2;
+        }
+
+        /* Cute click heart animation */
+        .click-heart {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            animation: clickFadeUp 1s forwards ease-out;
+        }
+        @keyframes clickFadeUp {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -120px) scale(1.4) rotate(20deg);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between selection:bg-roseRed selection:text-white">
+
+    <!-- Canvas para os corações caindo suavemente ao fundo -->
+    <canvas id="heart-canvas"></canvas>
+
+    <!-- Ambient Light Background Blobs -->
+    <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] bg-roseRed/15 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="fixed bottom-10 right-10 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-softRed/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <!-- Music/Audio Ambient Control (Tone.js generated cute chord sound on interaction) -->
+    <div class="fixed top-4 right-4 z-50">
+        <button id="soundToggleBtn" onclick="toggleAudio()" class="px-4 py-2 rounded-full glass-card border border-roseRed/40 text-xs sm:text-sm font-comfortaa text-cutePink hover:bg-roseRed/20 transition-all flex items-center gap-2 shadow-lg">
+            <i id="soundIcon" class="fas fa-heart text-roseRed pulse-heart">
+            </i> <span id="soundText">Tocar Música & Mimos</span>
+        </button>
+    </div>
+
+    <!-- Content Container -->
+    <main class="relative z-10 container mx-auto px-4 py-12 max-w-3xl flex-grow flex flex-col items-center">
+        
+        <!-- Header decorativo fofo -->
+        <header class="text-center mb-10 w-full float-anim">
+            <div class="inline-block relative">
+                <!-- Nuvem/Laço fofo no topo -->
+                <div class="flex justify-center items-center gap-2 mb-3 text-cutePink text-2xl sm:text-3xl">
+                    <i class="fas fa-sparkles animate-pulse"></i>
+                    <i class="fas fa-heart text-roseRed pulse-heart"></i>
+                    <i class="fas fa-sparkles animate-pulse"></i>
+                </div>
+                
+                <h1 class="font-pacifico text-3xl sm:text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-cutePink via-roseRed to-softRed glow-title pb-3 px-2">
+                    pra minha princesa mais linda do mundoo:
+                </h1>
+                
+                <div class="h-1 w-32 bg-gradient-to-r from-transparent via-roseRed to-transparent mx-auto mt-2 rounded-full"></div>
+            </div>
+        </header>
+
+        <!-- Seção da Carta principal -->
+        <article class="w-full space-y-6">
+            
+            <!-- Parágrafo 1 -->
+            <div class="glass-card glass-card-hover p-6 sm:p-8 rounded-3xl relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 text-roseRed/10 group-hover:text-roseRed/20 transition-all text-8xl pointer-events-none">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="hidden sm:flex items-center justify-center w-10 h-10 rounded-2xl bg-roseRed/20 text-cutePink shrink-0 mt-1">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <p class="text-base sm:text-lg leading-relaxed text-pink-100 font-medium">
+                        eu queria muito conseguir passar mais tempo com você, de verdade, minha rotina tá sendo muito corrida, estudo de manhã, trabalho à tarde e estudo de novo à noite, e às vezes parece que o dia acaba antes mesmo de eu conseguir fazer tudo que queria, e uma das coisas que mais sinto falta é de estar com você, te abraçar, conversar e aproveitar nossos momentos juntinhos
+                    </p>
+                </div>
+            </div>
+
+            <!-- Parágrafo 2 -->
+            <div class="glass-card glass-card-hover p-6 sm:p-8 rounded-3xl relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 text-roseRed/10 group-hover:text-roseRed/20 transition-all text-8xl pointer-events-none">
+                    <i class="fas fa-heart text-roseRed"></i>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="hidden sm:flex items-center justify-center w-10 h-10 rounded-2xl bg-roseRed/20 text-cutePink shrink-0 mt-1">
+                        <i class="fas fa-kiss-wink-heart"></i>
+                    </div>
+                    <p class="text-base sm:text-lg leading-relaxed text-pink-100 font-medium">
+                        quero que você saiba que, mesmo com toda essa correria, meu amor por você continua o mesmo, eu sei que não é fácil a gente conseguir se ver como gostaria, e também fico triste com isso, porque você é uma das pessoas com quem eu mais quero estar
+                    </p>
+                </div>
+            </div>
+
+            <!-- Parágrafo 3 -->
+            <div class="glass-card glass-card-hover p-6 sm:p-8 rounded-3xl relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 text-roseRed/10 group-hover:text-roseRed/20 transition-all text-8xl pointer-events-none">
+                    <i class="fas fa-hand-holding-heart"></i>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="hidden sm:flex items-center justify-center w-10 h-10 rounded-2xl bg-roseRed/20 text-cutePink shrink-0 mt-1">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-base sm:text-lg leading-relaxed text-pink-100 font-medium">
+                        eu não quero que a gente se acostume com essa saudade, meu bem, quero me esforçar pra organizar melhor as coisas e encontrar mais tempo pra nós dois, não vou prometer que tudo vai mudar de uma hora pra outra, mas quero fazer o possível pra melhorar isso, porque você merece meu carinho, minha atenção e minha presença
+                    </p>
+                </div>
+            </div>
+
+            <!-- Parágrafo 4 -->
+            <div class="glass-card glass-card-hover p-6 sm:p-8 rounded-3xl relative overflow-hidden group border-roseRed/50">
+                <div class="absolute -right-4 -bottom-4 text-roseRed/15 group-hover:text-roseRed/25 transition-all text-8xl pointer-events-none">
+                    <i class="fas fa-infinity"></i>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="hidden sm:flex items-center justify-center w-10 h-10 rounded-2xl bg-roseRed/30 text-roseRed shrink-0 mt-1">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <p class="text-base sm:text-lg leading-relaxed text-pink-100 font-semibold">
+                        eu te amo muito, Lara, e não quero que a falta de tempo faça você duvidar disso nem por um segundo, sinto sua falta até nas coisas mais simples, e tudo que eu mais quero é poder ficar mais pertinho de você ❤️
+                    </p>
+                </div>
+            </div>
+
+            <!-- Parágrafo 5 / Final amoroso -->
+            <div class="glass-card p-8 rounded-3xl text-center bg-gradient-to-b from-darkCard via-roseRed/20 to-darkCard border-roseRed/60 shadow-2xl relative">
+                <div class="mb-3 text-3xl text-cutePink">
+                    <i class="fas fa-crown animate-bounce"></i>
+                </div>
+                <p class="font-comfortaa text-xl sm:text-2xl font-bold text-white tracking-wide leading-relaxed">
+                    eu te amo, meu amor, e quero continuar fazendo dar certo com você 🥹❤️
+                </p>
+            </div>
+
+        </article>
+
+        <!-- Botão Interativo / Surpresa com chuva de corações -->
+        <div class="mt-12 text-center w-full">
+            <button onclick="triggerSurprise(event)" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-comfortaa font-bold text-white bg-gradient-to-r from-roseRed via-softRed to-cutePink rounded-full shadow-lg shadow-roseRed/40 hover:shadow-roseRed/70 hover:scale-105 active:scale-95 transition-all duration-300 overflow-hidden cursor-pointer">
+                <span class="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-72 group-hover:h-72 opacity-20"></span>
+                <i class="fas fa-gift mr-3 text-xl group-hover:rotate-12 transition-transform"></i>
+                <span>Clique para receber um abraço apertado! 🥰</span>
+            </button>
+            <p class="text-xs text-cutePink/70 mt-3 font-comfortaa">Toque em qualquer lugar da tela para espalhar corações! ✨</p>
+        </div>
+
+        <!-- Caixinha de Promessa / Notas fofas -->
+        <section class="mt-12 w-full grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="glass-card p-4 rounded-2xl text-center hover:border-cutePink/50 transition-all">
+                <div class="text-roseRed text-xl mb-2"><i class="fas fa-shield-heart"></i></div>
+                <h3 class="font-comfortaa font-bold text-sm text-cutePink">Amor Incondicional</h3>
+                <p class="text-xs text-pink-200/80 mt-1">Mesmo na correria, você é sempre minha prioridade.</p>
+            </div>
+            <div class="glass-card p-4 rounded-2xl text-center hover:border-cutePink/50 transition-all">
+                <div class="text-roseRed text-xl mb-2"><i class="fas fa-home"></i></div>
+                <h3 class="font-comfortaa font-bold text-sm text-cutePink">Meu Porto Seguro</h3>
+                <p class="text-xs text-pink-200/80 mt-1">Estar com você é o melhor momento do meu dia.</p>
+            </div>
+            <div class="glass-card p-4 rounded-2xl text-center hover:border-cutePink/50 transition-all">
+                <div class="text-roseRed text-xl mb-2"><i class="fas fa-sparkles"></i></div>
+                <h3 class="font-comfortaa font-bold text-sm text-cutePink">Pra Sempre</h3>
+                <p class="text-xs text-pink-200/80 mt-1">Vamos vencer essa fase e ficar bem juntinhos!</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 text-center py-6 text-xs text-cutePink/60 font-comfortaa">
+        Feito com todo o amor do mundo especialmente para a <span class="text-roseRed font-bold">Lara</span> ❤️
+    </footer>
+
+    <!-- Modal Popup Surpresa -->
+    <div id="hugModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass-card border-roseRed/80 p-8 rounded-3xl max-w-md w-full text-center transform scale-95 transition-transform duration-300 relative shadow-2xl">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-cutePink/70 hover:text-white text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="w-20 h-20 bg-roseRed/20 text-roseRed rounded-full flex items-center justify-center mx-auto mb-4 text-4xl pulse-heart">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h3 class="font-pacifico text-3xl text-cutePink mb-2">Sinta meu abraço! 🫂❤️</h3>
+            <p class="text-pink-100 text-sm sm:text-base leading-relaxed font-medium mb-6">
+                Sinta-se abraçada bem forte agora! Prometo que logo, logo a gente vai se ver e eu não vou te soltar por nada nesse mundo. Te amo infinitamente, minha princesa Lara!
+            </p>
+            <button onclick="closeModal()" class="w-full py-3 bg-gradient-to-r from-roseRed to-softRed text-white font-comfortaa font-bold rounded-2xl hover:opacity-90 transition-opacity shadow-lg">
+                Te amo muito! 🥰
+            </button>
+        </div>
+    </div>
+
+    <!-- Web Audio API Synth para música/acordes suaves sem dependências externas -->
+    <script>
+        // --- Canvas de Corações Flutuantes no Fundo ---
+        const canvas = document.getElementById('heart-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const hearts = [];
+        const heartColors = ['#ff2a5f', '#ff85a2', '#ff4d6d', '#e60039', '#ffb3c1'];
+
+        class FloatingHeart {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 50;
+                this.size = Math.random() * 12 + 8;
+                this.speedY = Math.random() * 1.2 + 0.5;
+                this.speedX = Math.sin(Math.random() * Math.PI * 2) * 0.5;
+                this.color = heartColors[Math.floor(Math.random() * heartColors.length)];
+                this.opacity = Math.random() * 0.6 + 0.3;
+                this.rotation = Math.random() * Math.PI;
+                this.rotSpeed = (Math.random() - 0.5) * 0.02;
+            }
+
+            update() {
+                this.y -= this.speedY;
+                this.x += Math.sin(this.y * 0.01) * 0.5;
+                this.rotation += this.rotSpeed;
+
+                if (this.y < -30) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                
+                // Desenhar forma de coração perfeita
+                ctx.beginPath();
+                const topCurveHeight = this.size * 0.3;
+                ctx.moveTo(0, topCurveHeight);
+                ctx.bezierCurveTo(0, 0, -this.size / 2, 0, -this.size / 2, topCurveHeight);
+                ctx.bezierCurveTo(-this.size / 2, (this.size + topCurveHeight) / 2, 0, this.size, 0, this.size);
+                ctx.bezierCurveTo(0, this.size, this.size / 2, (this.size + topCurveHeight) / 2, this.size / 2, topCurveHeight);
+                ctx.bezierCurveTo(this.size / 2, 0, 0, 0, 0, topCurveHeight);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        // Criar quantidade ideal de corações
+        const heartCount = Math.min(35, Math.floor(window.innerWidth / 25));
+        for (let i = 0; i < heartCount; i++) {
+            const h = new FloatingHeart();
+            h.y = Math.random() * canvas.height; // Espalhar inicialmente
+            hearts.push(h);
+        }
+
+        function animateHearts() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hearts.forEach(h => {
+                h.update();
+                h.draw();
+            });
+            requestAnimationFrame(animateHearts);
+        }
+        animateHearts();
+
+        // --- Animação de Coração ao Clicar na Tela ---
+        window.addEventListener('click', (e) => {
+            // Evitar criar se for botão
+            if (e.target.closest('button')) return;
+
+            const heartEl = document.createElement('div');
+            heartEl.className = 'click-heart text-2xl text-roseRed';
+            heartEl.style.left = `${e.clientX}px`;
+            heartEl.style.top = `${e.clientY}px`;
+            
+            const icons = ['❤️', '💖', '💕', '💗', '✨', '🌸'];
+            heartEl.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+            
+            document.body.appendChild(heartEl);
+
+            setTimeout(() => {
+                heartEl.remove();
+            }, 1000);
+
+            // Tocar som suave de clique
+            playSoftTone();
+        });
+
+        // --- Efeito de Surpresa no Botão ---
+        function triggerSurprise(event) {
+            event.stopPropagation();
+            
+            // Explosão de confete de corações usando canvas-confetti
+            const duration = 3 * 1000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#ff2a5f', '#ff85a2', '#ffffff', '#ff4d6d']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#ff2a5f', '#ff85a2', '#ffffff', '#ff4d6d']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            })();
+
+            // Abrir Modal
+            const modal = document.getElementById('hugModal');
+            const card = modal.querySelector('.glass-card');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-95');
+            card.classList.add('scale-100');
+
+            // Tocada especial
+            playChordSequence();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('hugModal');
+            const card = modal.querySelector('.glass-card');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+        }
+
+        // --- Web Audio API para Músicas/Sons Relaxantes ---
+        let audioCtx = null;
+        let isPlaying = false;
+        let ambientInterval = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSoftTone() {
+            if (!isPlaying) return;
+            initAudio();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            // Frequências suaves da escala Pentatônica Maior (C4, D4, E4, G4, A4, C5)
+            const freqs = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
+            const note = freqs[Math.floor(Math.random() * freqs.length)];
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(note, audioCtx.currentTime);
+
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.2);
+        }
+
+        function playChordSequence() {
+            initAudio();
+            const notes = [329.63, 392.00, 493.88, 587.33, 659.25]; // Em7/G chord
+            notes.forEach((freq, idx) => {
+                setTimeout(() => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.5);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 2.5);
+                }, idx * 180);
+            });
+        }
+
+        function toggleAudio() {
+            initAudio();
+            const btnText = document.getElementById('soundText');
+            const btnIcon = document.getElementById('soundIcon');
+
+            if (!isPlaying) {
+                isPlaying = true;
+                btnText.innerText = "Sons Românticos On ✨";
+                btnIcon.className = "fas fa-heart text-cutePink pulse-heart";
+                
+                playChordSequence();
+
+                // Tocar melodias ambiente suaves periodicamente
+                ambientInterval = setInterval(() => {
+                    if (isPlaying) {
+                        playSoftTone();
+                    }
+                }, 2200);
+
+            } else {
+                isPlaying = false;
+                btnText.innerText = "Tocar Música & Mimos";
+                btnIcon.className = "fas fa-heart-broken text-roseRed";
+                clearInterval(ambientInterval);
+            }
+        }
+    </script>
+</body>
+</html>
